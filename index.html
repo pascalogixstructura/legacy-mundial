@@ -1,116 +1,118 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Legacy Mundial Hash Proof Tool</title>
-
-  <!-- PWA manifest -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#10243d">
+  <meta name="description" content="Compute and compare SHA-256 file fingerprints locally in your browser.">
+  <title>Legacy Mundial — File Integrity</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <meta name="theme-color" content="#101020">
-
-  <!-- Favicon & app icons -->
   <link rel="icon" type="image/png" href="assets/logo-512.png">
   <link rel="apple-touch-icon" href="assets/logo-512.png">
-
-  <!-- Stylesheet -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="brandbar">
-    <div class="brand">
-      <img src="assets/logo-512.png" alt="Brain Crest Logo" class="logo">
-      <div class="brandtext">
-        <h1>Legacy Mundial Hash Proof Tool</h1>
-        <p>From Structura Cerebri — by Maynard Rafael Pascasio</p>
-      </div>
-    </div>
-    <div class="copyright">© 2025 Maynard Rafael Pascasio • LegacyKey v1</div>
+  <header class="site-header">
+    <a class="brand" href="./" aria-label="Legacy Mundial home">
+      <img src="assets/logo-512.png" alt="" class="brand-mark">
+      <span><strong>LEGACY MUNDIAL</strong><small>PRESERVE · VERIFY · TRUST</small></span>
+    </a>
+    <div class="privacy-note"><span class="privacy-dot"></span> LOCAL PROCESSING <span class="privacy-sep">·</span> FILES STAY ON THIS DEVICE</div>
   </header>
 
-  <main class="panel">
-    <section class="row">
-      <div class="card uploader">
-        <h3>Step 1 — Upload File</h3>
-        <div id="dropzone" class="dropzone"><strong>Drop file here</strong></div>
-        <div class="browse">
-          <label class="btn primary">Choose File
-            <input id="fileInput" type="file" hidden />
-          </label>
-          <div class="hint">Photos, documents, videos, audio, ZIPs, NFT media — anything digital.</div>
+  <main class="shell">
+    <section class="intro">
+      <p class="eyebrow">A DIGITAL INTEGRITY UTILITY</p>
+      <h1>Verify the integrity<br class="mobile-break"> of a digital file.</h1>
+      <p class="lede">Compute a SHA-256 fingerprint in your browser. Compare it with a trusted reference. No file upload.</p>
+      <div class="ornament" aria-hidden="true"><span></span><i>◆</i><span></span></div>
+    </section>
+
+    <section class="workflow" aria-label="File verification workflow">
+      <article class="surface select-card">
+        <div class="surface-heading"><span class="step">01</span><div><p class="eyebrow">START HERE</p><h2>Select a file</h2></div></div>
+        <label class="dropzone" id="dropzone" for="fileInput">
+          <span class="upload-icon" aria-hidden="true">↑</span>
+          <strong>Drop a file here</strong>
+          <span>or choose one from your device</span>
+          <span class="choose-button">Choose file</span>
+          <input id="fileInput" type="file">
+        </label>
+        <p class="support-note"><span aria-hidden="true">ⓘ</span> Any file type · Processed locally in this browser</p>
+        <dl class="file-details" id="fileDetails" hidden>
+          <div><dt>File</dt><dd id="fileName">—</dd></div>
+          <div><dt>Size</dt><dd id="fileSize">—</dd></div>
+          <div><dt>Modified</dt><dd id="fileModified">—</dd></div>
+        </dl>
+        <p class="microcopy">For this browser-based version, files are limited to 100 MB per operation.</p>
+      </article>
+
+      <article class="surface fingerprint-card">
+        <div class="surface-heading"><span class="step">02</span><div><p class="eyebrow">COMPUTED LOCALLY</p><h2>SHA-256 fingerprint</h2></div></div>
+        <div class="hash-panel">
+          <code id="hashOut" aria-live="polite">Your 64-character fingerprint will appear here.</code>
+          <button class="icon-button" id="copyHash" type="button" disabled>Copy</button>
         </div>
+        <p class="status-line" id="hashStatus" role="status">Select a file to calculate its fingerprint.</p>
+        <div class="rule-note"><strong>What this means</strong><p>A SHA-256 digest is a fingerprint of the exact file bytes. A matching digest indicates a byte-for-byte match with the reference you supplied.</p></div>
+      </article>
+    </section>
+
+    <section class="surface compare-card">
+      <div class="surface-heading compact"><span class="step">03</span><div><p class="eyebrow">REFERENCE CHECK</p><h2>Compare with a reference hash</h2></div></div>
+      <label class="field-label" for="primaryHash">Reference SHA-256</label>
+      <div class="compare-row">
+        <input id="primaryHash" type="text" inputmode="text" autocomplete="off" spellcheck="false" placeholder="Paste a trusted 64-character SHA-256 hash" aria-describedby="referenceHelp">
+        <button class="gold-button" id="compareBtn" type="button" disabled>Compare hashes</button>
       </div>
-      <div class="card saveproof">
-        <h3>Save Proof</h3>
-        <div class="btncol">
-          <button id="saveTxt" class="btn">Save .hash.txt</button>
-          <button id="saveJson" class="btn">Save .hash.json</button>
-          <button id="saveBadge" class="btn">Save Badge.png</button>
+      <p class="field-help" id="referenceHelp">Use a reference obtained independently from a source you trust. Spaces are not silently removed from the hash.</p>
+      <details class="more-references">
+        <summary>Add another reference (optional)</summary>
+        <div class="secondary-fields">
+          <label for="secondaryHash">Reference 2 — optional</label>
+          <input id="secondaryHash" type="text" inputmode="text" autocomplete="off" spellcheck="false" placeholder="64-character SHA-256">
+          <label for="tertiaryHash">Reference 3 — optional</label>
+          <input id="tertiaryHash" type="text" inputmode="text" autocomplete="off" spellcheck="false" placeholder="64-character SHA-256">
         </div>
+      </details>
+      <div class="result-panel" id="resultPanel" data-state="idle" aria-live="polite">
+        <span class="result-symbol" id="resultSymbol">i</span>
+        <div><strong id="verdictText">No comparison performed</strong><p id="verdictDetail">Choose a file and enter a trusted reference hash.</p></div>
       </div>
     </section>
-    <section class="row">
-      <div class="card steps">
-        <h3>Layman’s Steps</h3>
-        <ol>
-          <li>Choose a file (drop or tap).</li>
-          <li>The tool makes its fingerprint (hash).</li>
-          <li>Paste an original hash (Primary/Secondary/Tertiary) if you have one.</li>
-          <li>Read verdict: ✅ MATCH • ❌ NOT A MATCH • ❔ UNKNOWN.</li>
-          <li>Save proof (TXT, JSON, Badge).</li>
-        </ol>
-        <h3>Why hash?</h3>
-        <p>A hash is a file’s fingerprint. If even 1 pixel changes, the fingerprint changes. This proves originality forever, on any device.</p>
-      </div>
-      <div class="card results">
-        <h3>Computed Hash (SHA-256)</h3>
-        <div class="hashline">
-          <code id="hashOut">—</code>
-          <button id="copyHash" class="btn">Copy</button>
-        </div>
-        <div class="meta" id="fileMeta">Filename: — • Bytes: —</div>
-        <div class="verdictwrap">
-          <div id="verdictIcon" class="icon unknown" aria-label="unknown">❔</div>
-          <div id="verdictText" class="verdict-text">UNKNOWN (no original provided)</div>
-        </div>
+
+    <section class="export-row">
+      <div><p class="eyebrow">KEEP A LOCAL RECORD</p><h2>Export a verification receipt</h2><p class="export-copy">Save the computed fingerprint and the comparison details for your own records.</p></div>
+      <div class="export-actions">
+        <button class="outline-button" id="saveTxt" type="button" disabled>↓ TXT</button>
+        <button class="outline-button" id="saveJson" type="button" disabled>{ } JSON</button>
+        <button class="outline-button" id="saveBadge" type="button" disabled>▧ PNG</button>
       </div>
     </section>
-    <section class="card claims">
-      <h3>Original Claims (optional)</h3>
-      <div class="claims-grid">
-        <div class="claim"><label>Primary Hash</label><input id="primaryHash" placeholder="Paste known original hash (SHA-256)" /></div>
-        <div class="claim"><label>Secondary Hash</label><input id="secondaryHash" placeholder="(optional)" /></div>
-        <div class="claim"><label>Tertiary Hash</label><input id="tertiaryHash" placeholder="(optional)" /></div>
-      </div>
-      <button id="compareBtn" class="btn">Compare</button>
+
+    <section class="limits">
+      <span class="limits-mark">!</span>
+      <div><strong>Understand the limits of a hash.</strong><p>A matching SHA-256 digest does not, by itself, prove authorship, ownership, creation date, legal validity or originality. Those claims require independently trusted records, timestamps, signatures or other evidence. The timestamp in a downloaded receipt is generated by your device and is not a trusted timestamp authority.</p></div>
     </section>
-    <footer class="foot">
-      <div class="lang">
-        <label for="langSel">Language:</label>
-        <select id="langSel">
-          <option value="en" selected>English</option>
-          <option value="es">Español</option>
-          <option value="tl">Tagalog</option>
-          <option value="ar">العربية</option>
-          <option value="zh">中文</option>
-        </select>
-      </div>
-      <button id="storyBtn" class="btn ghost">The Story Behind Legacy Mundial</button>
+
+    <footer class="site-footer">
+      <span>Legacy Mundial <span class="footer-sep">/</span> LegacyKey</span>
+      <span>Concept and authorship: Maynard Rafael Pascasio</span>
+      <button id="aboutBtn" type="button" class="text-button">About this tool</button>
     </footer>
   </main>
 
-  <dialog id="storyDlg">
-    <article class="story">
-      <div class="storybody" id="storyBody"></div>
-      <div class="storyactions">
-        <a id="storyOnline" class="btn" href="#" target="_blank" rel="noopener">Read Full Story Online</a>
-        <button id="resetStory" class="btn">Reset Story</button>
-        <button id="closeStory" class="btn primary">Back to Tool</button>
-      </div>
-    </article>
+  <dialog id="aboutDialog">
+    <div class="dialog-inner">
+      <p class="eyebrow">ABOUT THE PROJECT</p>
+      <h2>Preserve. Verify. Trust.</h2>
+      <p>Legacy Mundial is a lightweight, browser-based utility for computing a digital file's SHA-256 fingerprint and comparing it with a reference value. The file is read locally by your browser; this page does not upload the selected file.</p>
+      <p>The tool is an integrity-checking aid. It is not a certification service, timestamp authority, digital-signature service or independent proof of authorship.</p>
+      <p class="dialog-credit">An independent project by Maynard Rafael Pascasio.</p>
+      <button id="closeAbout" class="gold-button" type="button">Return to tool</button>
+    </div>
   </dialog>
-
-  <canvas id="badgeCanvas" width="900" height="540" style="display:none"></canvas>
-  <script src="app.js"></script>
+  <canvas id="badgeCanvas" width="1200" height="720" hidden></canvas>
+  <script src="app.js" defer></script>
 </body>
 </html>
